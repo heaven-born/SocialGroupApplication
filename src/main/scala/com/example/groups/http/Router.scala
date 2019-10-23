@@ -3,26 +3,27 @@ package com.example.groups.http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import com.example.groups.http.dto.{RegisterMemberDto, PostDto, UserDto}
+import com.example.groups.http.dto.JsonSupport._
 
 object Router {
 
-  def routes() = {
+  def routes(service: GroupService) = {
       concat(
         get {
           concat (
             path("list-groups") {
-              complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>list-groups</h1>"))
+              complete(service.listGroups())
             },
             path("group-feed") {
-              parameters("start-from-post-id".?, "groupId".as[Long], "number-posts-to-load".as[Int]) {
-               (lastPostId, groupId, numberPosts) =>
-                    complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"<h1>group-feed id $groupId</h1>"))
+              parameters("groupId".as[Long], "start-from-post-id".as[Long].?,  "number-posts-to-load".as[Int].?) {
+               (groupId, lastPostId, numberPosts) =>
+                    complete(service.groupFeed(groupId, lastPostId, numberPosts))
               }
             },
             path("all-groups-feed") {
-              parameters("start-from-post-id".?, "groupId".as[Long], "number-posts-to-load".as[Int]) {
-                (lastPostId, groupId, numberPosts) =>
-                  complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"<h1>group-feed id $groupId</h1>"))
+              parameters("start-from-post-id".as[Long].?,  "number-posts-to-load".as[Int].?) {
+                (lastPostId, numberPosts) =>
+                  complete(service.allGroupsFeed(lastPostId, numberPosts))
               }
             }
           )
@@ -31,17 +32,17 @@ object Router {
           concat(
             path("register-group-member") {
               entity(as[RegisterMemberDto]) { group =>
-                complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"<h1>group $group</h1>"))
+                complete(service.registerGroupMember(group))
               }
             },
-            path("post") {
+            path("post-to-group") {
               entity(as[PostDto]) { post =>
-                complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"<h1>post = $post</h1>"))
+                complete(service.postToGroup(post))
               }
             },
             path("register-user") {
               entity(as[UserDto]) { user =>
-                complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"<h1>user = $user</h1>"))
+                complete(service.registerUser(user))
               }
             }
           )

@@ -4,18 +4,20 @@ import com.example.groups.http.dto._
 
 class GroupService {
 
-  private val POST_ON_PAGE = 100
+  private val POST_ON_PAGE = Some(100)
 
-  def registerUser(user: UserDto):Unit = ???
+  def registerUser(user: UserDto):ResultDto = ResultDto("User registered")
 
-  def addPost(user: PostDto):Unit= ???
+  def postToGroup(user: PostDto):ResultDto = ResultDto("Message posted")
 
-  def addGroupMember(newMember: RegisterMemberDto):Unit = ???
+  def registerGroupMember(newMember: RegisterMemberDto):ResultDto = ResultDto("Member registered")
 
-  def listGroups():GroupsDto = ???
+  def listGroups():GroupsDto = GroupsDto(Set(1,2,3))
 
-  def groupFeed(groupId: Long, startFromPostId: Option[Long], numberPostsToLoad: Int = POST_ON_PAGE):GroupFeedDto = ???
+  def groupFeed(groupId: Long, startFromPostId: Option[Long], numberPostsToLoad: Option[Int] = POST_ON_PAGE):GroupFeedDto =
+    GroupFeedDto(List(PostDto(1,2,"postMessage from one groupe")))
 
-  def allGroupsFeed(groupId: Long, startFromPostId: Option[Long], numberPostsToLoad: Int =  POST_ON_PAGE):GroupFeedDto = ???
+  def allGroupsFeed(startFromPostId: Option[Long], numberPostsToLoad: Option[Int] =  POST_ON_PAGE):GroupFeedDto =
+    GroupFeedDto(List(PostDto(1,2,"postMessage from all groups")))
 
 }
