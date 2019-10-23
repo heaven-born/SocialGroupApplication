@@ -1,3 +1,5 @@
 package com.example.groups.http.dto
 
-case class RegisterMemberDto(userId: Long, groupId: Long)
+import java.util.UUID
+
+case class RegisterMemberDto(userId: UUID, groupId: UUID)

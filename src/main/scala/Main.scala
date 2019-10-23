@@ -1,6 +1,7 @@
 import akka.stream.Materializer
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
+import com.example.groups.domain.Model.Network
 import com.example.groups.http.{GroupService, Router}
 
 import scala.io.StdIn
@@ -13,7 +14,7 @@ object Main {
     implicit val executionContext = system.dispatcher
     val materializer: Materializer = Materializer(system)
 
-    val route = Router.routes(new GroupService())
+    val route = Router.routes(new GroupService(Network()))
 
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
 

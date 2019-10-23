@@ -1,3 +1,5 @@
 package com.example.groups.http.dto
 
-case class GroupsDto(groupIds: Set[Long])
+import java.util.UUID
+
+case class GroupsDto(groupIds: Set[UUID])

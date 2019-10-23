@@ -1,3 +1,8 @@
 package com.example.groups.http.dto
 
-case class PostDto(userId: Long, groupId: Long, message: String)
+import java.util.UUID
+
+case class PostRequestDto(userId: UUID, groupId: UUID, content: String)
+
+case class PostResponseDto(id: UUID, creationTime: Long, authorUserId: UUID, authorUserName: String, content: String)
+case class PostAllFeedsResponseDto(id: UUID, creationTime: Long, authorUserId: UUID, authorUserName: String, content: String)

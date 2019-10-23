@@ -1,29 +1,38 @@
 package com.example.groups.http
 
-import akka.http.scaladsl.model._
+import java.util.UUID
+
+import akka.http.scaladsl.marshalling.ToResponseMarshaller
 import akka.http.scaladsl.server.Directives._
-import com.example.groups.http.dto.{RegisterMemberDto, PostDto, UserDto}
+import com.example.groups.http.dto._
 import com.example.groups.http.dto.JsonSupport._
+import zio.{DefaultRuntime, IO}
+
 
 object Router {
+
+  private val runtime = new DefaultRuntime {}
+
+  private def completeZio[A:ToResponseMarshaller ,B:ToResponseMarshaller](zio: => IO[A, B]) =
+    runtime.unsafeRun(zio.fold(complete(_),complete(_)))
 
   def routes(service: GroupService) = {
       concat(
         get {
           concat (
             path("list-groups") {
-              complete(service.listGroups())
+               completeZio(service.listGroups())
             },
             path("group-feed") {
-              parameters("groupId".as[Long], "start-from-post-id".as[Long].?,  "number-posts-to-load".as[Int].?) {
-               (groupId, lastPostId, numberPosts) =>
-                    complete(service.groupFeed(groupId, lastPostId, numberPosts))
+              parameters("userId".as[UUID], "groupId".as[UUID], "start-from-timestamp".as[Long].?,  "number-posts-to-load".as[Int].?) {
+               (userId, groupId, startFromTimestamp, numberPosts) =>
+                 completeZio(service.groupFeed(userId, groupId, startFromTimestamp, numberPosts))
               }
             },
-            path("all-groups-feed") {
-              parameters("start-from-post-id".as[Long].?,  "number-posts-to-load".as[Int].?) {
-                (lastPostId, numberPosts) =>
-                  complete(service.allGroupsFeed(lastPostId, numberPosts))
+            path("all-user-groups-feed") {
+              parameters("userId".as[UUID],"start-from-timestamp".as[Long].?,  "number-posts-to-load".as[Int].?) {
+                (userId, startFromTimestamp, numberPosts) =>
+                  completeZio(service.allGroupsFeed(userId, startFromTimestamp, numberPosts))
               }
             }
           )
@@ -32,17 +41,17 @@ object Router {
           concat(
             path("register-group-member") {
               entity(as[RegisterMemberDto]) { group =>
-                complete(service.registerGroupMember(group))
+                completeZio(service.registerGroupMember(group))
               }
             },
             path("post-to-group") {
-              entity(as[PostDto]) { post =>
-                complete(service.postToGroup(post))
+              entity(as[PostRequestDto]) { post =>
+                completeZio(service.postToGroup(post))
               }
             },
             path("register-user") {
               entity(as[UserDto]) { user =>
-                complete(service.registerUser(user))
+                completeZio(service.registerUser(user))
               }
             }
           )

@@ -1,3 +1,4 @@
 package com.example.groups.http.dto
 
-case class ResultDto(message:String = "Success")
+case class SuccessDto(message:String = "Success")
+case class ErrorDto(message:String = "Error")
