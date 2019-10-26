@@ -10,7 +10,7 @@ object Model {
 
   case class Groups() extends GroupsBehaviour
   case class Group(id: UUID) extends GroupBehaviour
-  case class GroupSet(ids:Set[UUID]) extends GroupSetBehaviour
+  case class GroupSet(ids:Set[Int]) extends GroupSetBehaviour
 
   case class Users() extends UsersBehaviour
   case class User(id: UUID, name: String)

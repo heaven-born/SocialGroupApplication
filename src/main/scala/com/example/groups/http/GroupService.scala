@@ -34,14 +34,13 @@ class GroupService (net: Network) {
     } yield SuccessDto("Member was registered")
   }
 
-  def listGroups():IO[ErrorDto,GroupsDto] = wrapError {
+  def listGroups(userId: UUID):IO[ErrorDto,GroupsDto] = wrapError {
     for {
-      groups <- groups.list()
-      groupIds = groups.map(_.id)
-    } yield GroupsDto(groupIds)
+      groups <- groups.byUser(userId)
+    } yield GroupsDto(groups.ids)
   }
 
-  def groupFeed(userId: UUID, groupId: UUID,
+  def groupFeed(userId: UUID, groupId: Int,
                 startFromTimestamp: Option[Long],
                 numberPostsToLoad: Option[Int]):IO[ErrorDto,FeedResponseDto] = wrapError {
     for {

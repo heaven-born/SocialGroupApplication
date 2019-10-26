@@ -25,10 +25,12 @@ case class Router(service: GroupService,ctx: CassandraSyncContext[LowerCase]) {
         get {
           concat (
             path("list-groups") {
-               completeZio(service.listGroups())
+              parameters("userId".as[UUID]) { userId =>
+                completeZio(service.listGroups(userId))
+              }
             },
             path("group-feed") {
-              parameters("userId".as[UUID], "groupId".as[UUID], "start-from-timestamp".as[Long].?,  "number-posts-to-load".as[Int].?) {
+              parameters("userId".as[UUID], "groupId".as[Int], "start-from-timestamp".as[Long].?,  "number-posts-to-load".as[Int].?) {
                (userId, groupId, startFromTimestamp, numberPosts) =>
                  completeZio(service.groupFeed(userId, groupId, startFromTimestamp, numberPosts))
               }
