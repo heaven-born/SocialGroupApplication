@@ -6,7 +6,7 @@ import akka.http.scaladsl.marshalling.ToResponseMarshaller
 import akka.http.scaladsl.server.Directives._
 import com.example.groups.http.dto._
 import com.example.groups.http.dto.JsonSupport._
-import com.example.groups.storage.dto.AppDatabase
+import com.example.groups.storage.AppDatabase
 import zio.internal.PlatformLive
 import zio.{DefaultRuntime, IO, Runtime, ZIO}
 

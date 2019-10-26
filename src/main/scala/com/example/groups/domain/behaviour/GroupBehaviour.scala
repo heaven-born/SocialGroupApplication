@@ -2,9 +2,8 @@ package com.example.groups.domain.behaviour
 
 import java.util.UUID
 
-import com.example.groups.CTX
 import com.example.groups.domain.Model._
-import com.example.groups.storage.dto.AppDatabase
+import com.example.groups.storage.AppDatabase
 import zio.{RIO, Task, ZIO}
 
 trait GroupBehaviour {
@@ -23,7 +22,7 @@ trait GroupBehaviour {
           res <- if (!exists)
                    ZIO.fail(new IllegalStateException(s"User with ID $userId doesn't exist"))
                  else
-                   ZIO.accessM[AppDatabase] { _.groups.register(group.id,userId) }
+                   ZIO.accessM[AppDatabase] { _.groups.store(group.id,userId) }
         } yield res
 
       def post(post: Post, userId: UUID, groupId: Int):Task[Post] =

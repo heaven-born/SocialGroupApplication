@@ -5,7 +5,7 @@ import com.example.groups.domain.Model._
 import java.util.UUID
 import java.util.UUID._
 
-import com.example.groups.storage.dto.AppDatabase
+import com.example.groups.storage.AppDatabase
 import zio.{IO, ZIO}
 
 class GroupService (net: Network) {
@@ -17,7 +17,6 @@ class GroupService (net: Network) {
       registeredUser <- users.register(User(randomUUID, user.name))
     } yield SuccessDto(s"User ${registeredUser.name} with ID ${registeredUser.id} was registered")
   }
-
 
   def postToGroup(user: PostRequestDto):IO[ErrorDto,SuccessDto]  = wrapError {
     for {
@@ -34,7 +33,7 @@ class GroupService (net: Network) {
     } yield SuccessDto("Member was registered")
   }
 
-  def listGroups(userId: UUID):IO[ErrorDto,GroupsDto] = wrapError {
+  def listGroups(userId: UUID):ZIO[AppDatabase, ErrorDto,GroupsDto] = wrapError {
     for {
       groups <- groups.byUser(userId)
     } yield GroupsDto(groups.ids)
@@ -52,7 +51,7 @@ class GroupService (net: Network) {
 
 
   def allGroupsFeed(userId: UUID, startFromTimestamp: Option[Long],
-                    numberPostsToLoad: Option[Int]):IO[ErrorDto,AllFeedsResponseDto] = wrapError {
+                    numberPostsToLoad: Option[Int]):ZIO[AppDatabase, ErrorDto,AllFeedsResponseDto] = wrapError {
     for {
       groupSet <- groups.byUser(userId)
       feed <- groupSet.feed(startFromTimestamp, numberPostsToLoad.getOrElse(POSTS_ON_PAGE))
@@ -61,7 +60,7 @@ class GroupService (net: Network) {
   }
 
 
-  private def wrapError[R, A](zio: ZIO[R,Throwable,A]) = zio.mapError(e=>ErrorDto(e.getMessage))
+  private def wrapError[R, A](zio: ZIO[R,Throwable,A]) = zio.mapError(e=>{e.printStackTrace();ErrorDto(e.getMessage)})
   private val POSTS_ON_PAGE = 100
   private def now = System.currentTimeMillis()
 
