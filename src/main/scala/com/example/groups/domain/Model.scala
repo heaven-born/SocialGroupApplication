@@ -9,7 +9,7 @@ object Model {
   case class Network (groups: Groups = Groups() ,users: Users = Users())
 
   case class Groups() extends GroupsBehaviour
-  case class Group(id: UUID) extends GroupBehaviour
+  case class Group(id: Int) extends GroupBehaviour
   case class GroupSet(ids:Set[Int]) extends GroupSetBehaviour
 
   case class Users() extends UsersBehaviour

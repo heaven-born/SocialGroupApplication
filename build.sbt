@@ -20,13 +20,19 @@ libraryDependencies += "io.spray" %% "spray-json" % "1.3.5"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.10"
 
-
-libraryDependencies += "io.getquill" %% "quill-cassandra" % "3.4.10"
-
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.28"
 
 
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.28"
+
+// https://mvnrepository.com/artifact/com.outworkers/phantom-dsl
+libraryDependencies += "com.outworkers" %% "phantom-dsl" % "2.42.0"
+
+libraryDependencies ++= Seq(
+  "io.spray" %% "spray-routing-shapeless2" % "1.3.5"
+)
+
+
 
 
 

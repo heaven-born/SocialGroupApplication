@@ -5,14 +5,14 @@ import com.example.groups.domain.Model._
 import java.util.UUID
 import java.util.UUID._
 
-import com.example.groups.CTX
-import zio.{IO,ZIO}
+import com.example.groups.storage.dto.AppDatabase
+import zio.{IO, ZIO}
 
 class GroupService (net: Network) {
 
   import net._
 
-  def registerUser(user: UserDto):ZIO[CTX,ErrorDto,SuccessDto] = wrapError {
+  def registerUser(user: UserDto):ZIO[AppDatabase,ErrorDto,SuccessDto] = wrapError {
     for {
       registeredUser <- users.register(User(randomUUID, user.name))
     } yield SuccessDto(s"User ${registeredUser.name} with ID ${registeredUser.id} was registered")
@@ -27,7 +27,7 @@ class GroupService (net: Network) {
     } yield SuccessDto(s"Message posted. ID: ${post.id}")
   }
 
-  def registerGroupMember(newMember: RegisterMemberDto):IO[ErrorDto,SuccessDto] = wrapError {
+  def registerGroupMember(newMember: RegisterMemberDto):ZIO[AppDatabase,ErrorDto,SuccessDto] = wrapError {
     for {
       group <- groups.get(newMember.groupId)
       _ <- group.registerMember(newMember.userId)
