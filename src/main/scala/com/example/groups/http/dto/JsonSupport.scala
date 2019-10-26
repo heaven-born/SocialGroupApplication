@@ -11,6 +11,7 @@ object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit lazy val userFormat = jsonFormat1(UserDto)
   implicit lazy val successFormat = jsonFormat1(SuccessDto)
   implicit lazy val errorFormat = jsonFormat1(ErrorDto)
+  implicit lazy val userRegisteredFormat = jsonFormat2(UserRegisteredDto)
 
   implicit lazy val postRespFormat = jsonFormat5(PostResponseDto)
   implicit lazy val orderFormat = jsonFormat1(FeedResponseDto)

@@ -12,10 +12,10 @@ class GroupService (net: Network) {
 
   import net._
 
-  def registerUser(user: UserDto):ZIO[AppDatabase,ErrorDto,SuccessDto] = wrapError {
+  def registerUser(user: UserDto):ZIO[AppDatabase,ErrorDto,UserRegisteredDto] = wrapError {
     for {
       registeredUser <- users.register(User(randomUUID, user.name))
-    } yield SuccessDto(s"User ${registeredUser.name} with ID ${registeredUser.id} was registered")
+    } yield UserRegisteredDto(registeredUser.id,s"User ${registeredUser.name} was registered")
   }
 
   def postToGroup(user: PostRequestDto):IO[ErrorDto,SuccessDto]  = wrapError {
