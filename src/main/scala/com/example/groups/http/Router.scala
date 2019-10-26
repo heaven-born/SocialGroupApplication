@@ -6,17 +6,21 @@ import akka.http.scaladsl.marshalling.ToResponseMarshaller
 import akka.http.scaladsl.server.Directives._
 import com.example.groups.http.dto._
 import com.example.groups.http.dto.JsonSupport._
-import zio.{DefaultRuntime, IO}
+import io.getquill.{CassandraSyncContext, LowerCase}
+import zio.internal.PlatformLive
+import zio.{DefaultRuntime, IO, Runtime, ZIO}
 
 
-object Router {
+case class Router(service: GroupService,ctx: CassandraSyncContext[LowerCase]) {
 
-  private val runtime = new DefaultRuntime {}
+  //private val runtime = new DefaultRuntime {}
+  val runtime = Runtime(ctx, PlatformLive.Default)
 
-  private def completeZio[A:ToResponseMarshaller ,B:ToResponseMarshaller](zio: => IO[A, B]) =
+
+  private def completeZio[A:ToResponseMarshaller ,B:ToResponseMarshaller](zio: => ZIO[CassandraSyncContext[LowerCase],A, B]) =
     runtime.unsafeRun(zio.fold(complete(_),complete(_)))
 
-  def routes(service: GroupService) = {
+  def routes() = {
       concat(
         get {
           concat (

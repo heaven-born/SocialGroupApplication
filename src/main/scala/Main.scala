@@ -3,6 +3,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import com.example.groups.domain.Model.Network
 import com.example.groups.http.{GroupService, Router}
+import io.getquill.{CassandraSyncContext, LowerCase}
 
 import scala.io.StdIn
 
@@ -14,7 +15,9 @@ object Main {
     implicit val executionContext = system.dispatcher
     val materializer: Materializer = Materializer(system)
 
-    val route = Router.routes(new GroupService(Network()))
+    lazy val ctx = new CassandraSyncContext[LowerCase](LowerCase, "ctx")
+
+    val route = Router(new GroupService(Network()),ctx).routes()
 
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
 

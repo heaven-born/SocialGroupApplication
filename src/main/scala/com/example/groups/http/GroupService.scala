@@ -5,13 +5,14 @@ import com.example.groups.domain.Model._
 import java.util.UUID
 import java.util.UUID._
 
-import zio.{IO, Task}
+import com.example.groups.CTX
+import zio.{IO,ZIO}
 
 class GroupService (net: Network) {
 
   import net._
 
-  def registerUser(user: UserDto):IO[ErrorDto,SuccessDto] = wrapError {
+  def registerUser(user: UserDto):ZIO[CTX,ErrorDto,SuccessDto] = wrapError {
     for {
       registeredUser <- users.register(User(randomUUID, user.name))
     } yield SuccessDto(s"User ${registeredUser.name} with ID ${registeredUser.id} was registered")
@@ -61,7 +62,7 @@ class GroupService (net: Network) {
   }
 
 
-  private def wrapError[T](zio: Task[T]) = zio.mapError(e=>ErrorDto(e.getMessage))
+  private def wrapError[R, A](zio: ZIO[R,Throwable,A]) = zio.mapError(e=>ErrorDto(e.getMessage))
   private val POSTS_ON_PAGE = 100
   private def now = System.currentTimeMillis()
 
