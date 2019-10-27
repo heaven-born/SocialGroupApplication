@@ -4,21 +4,24 @@ import java.util.UUID
 
 import akka.http.scaladsl.marshalling.ToResponseMarshaller
 import akka.http.scaladsl.server.Directives._
+import com.example.groups.Main.{AppDatabase}
 import com.example.groups.http.dto._
 import com.example.groups.http.dto.JsonSupport._
-import com.example.groups.storage.AppDatabase
 import zio.internal.PlatformLive
 import zio.{DefaultRuntime, IO, Runtime, ZIO}
 
 
 
-case class Router(service: GroupService,repos: AppDatabase) {
+case class Router(service: GroupService,repos: ZIO[Any, Nothing, AppDatabase]) {
 
   val runtime = Runtime(repos, PlatformLive.Default)
 
 
-  private def completeZio[A:ToResponseMarshaller ,B:ToResponseMarshaller](zio: => ZIO[AppDatabase,A, B]) =
-    runtime.unsafeRun(zio.fold(complete(_),complete(_)))
+  private def completeZio[A:ToResponseMarshaller ,B:ToResponseMarshaller](zio: => ZIO[AppDatabase,A, B]) = {
+    val res = zio.fold(complete(_),complete(_)).provideM(repos)
+    runtime.unsafeRun(res)
+  }
+
 
   def routes() = {
       concat(

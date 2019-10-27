@@ -7,7 +7,7 @@ import com.example.groups.storage.Model.{group_member, user}
 import com.outworkers.phantom.dsl._
 import zio.{Task, ZIO}
 
-private[storage] object Model {
+object Model {
   case class group_member(user_id:UUID,group_id: Int)
   case class user(user_id: UUID, user_name: String)
   case class posts(id: UUID,
@@ -19,7 +19,7 @@ private[storage] object Model {
                    content: String)
 }
 
-private[storage] abstract class users extends Table[users, user] {
+abstract class users extends Table[users, user] {
   object user_id extends UUIDColumn with PartitionKey
   object user_name extends StringColumn
 
@@ -36,7 +36,7 @@ private[storage] abstract class users extends Table[users, user] {
   }
 }
 
-private[storage] abstract class group_members extends Table[group_members, group_member] {
+abstract class group_members extends Table[group_members, group_member] {
   object user_id extends UUIDColumn with PartitionKey
   object group_id extends IntColumn with PrimaryKey
 
@@ -56,10 +56,4 @@ private[storage] abstract class group_members extends Table[group_members, group
   }
 }
 
-class AppDatabase(
-                   override val connector: CassandraConnection
-                 ) extends Database[AppDatabase](connector) {
-  object users extends users with Connector
-  object groups extends group_members with Connector
-}
 

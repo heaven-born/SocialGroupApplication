@@ -6,6 +6,6 @@ import zio.Task
 trait GroupSetBehaviour {
   self: GroupSet =>
 
-    def feed(startFromTimestamp: Option[Long], numberPostsToLoad: Int): Task[List[PostWithAuthor]] = ???
+    def feed(startFromTimestamp: Option[Long], numberOfPostsToLoad: Int): Task[List[PostWithAuthor]] = ???
 
 }

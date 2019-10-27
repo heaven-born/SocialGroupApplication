@@ -39,7 +39,7 @@ libraryDependencies += "org.scalatest" %% "scalatest-wordspec" % "3.2.0-M1" % Te
 
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-stream-testkit" % "2.5.23" % Test,
+  "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.0-M8" % Test,
   "com.typesafe.akka" %% "akka-http-testkit" % "10.1.10" % Test
 )
 

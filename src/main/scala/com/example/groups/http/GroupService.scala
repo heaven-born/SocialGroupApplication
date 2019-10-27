@@ -5,7 +5,7 @@ import com.example.groups.domain.Model._
 import java.util.UUID
 import java.util.UUID._
 
-import com.example.groups.storage.AppDatabase
+import com.example.groups.Main.AppDatabase
 import zio.{IO, ZIO}
 
 class GroupService (net: Network) {

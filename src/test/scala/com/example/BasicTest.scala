@@ -23,7 +23,7 @@ class BasicTest extends AnyWordSpec with ScalatestRouteTest {
 
     "Application" should {
 
-        "add new user" in {
+        "pass basic flow test" in {
 
             val user = UserDto(name="username1")
 
@@ -51,6 +51,12 @@ class BasicTest extends AnyWordSpec with ScalatestRouteTest {
             Get(s"/list-groups?userId=$userId") ~> smallRoute ~> check {
                 val groups = responseAs[GroupsDto]
                 groups.groupIds shouldEqual Set(2)
+            }
+
+
+            val post = PostRequestDto(userId, 2, "some content")
+            Post("/post-to-group", post) ~> smallRoute ~> check {
+                responseAs[SuccessDto]
             }
 
 

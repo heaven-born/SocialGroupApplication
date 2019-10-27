@@ -2,8 +2,8 @@ package com.example.groups.domain.behaviour
 
 import java.util.UUID
 
+import com.example.groups.Main.AppDatabase
 import com.example.groups.domain.Model._
-import com.example.groups.storage.AppDatabase
 import zio.{RIO, Task, ZIO}
 
 trait GroupsBehaviour {
