@@ -3,8 +3,9 @@ package com.example.groups.http
 import java.util.UUID
 
 import akka.http.scaladsl.marshalling.ToResponseMarshaller
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import com.example.groups.Main.{AppDatabase}
+import com.example.groups.Main.Env
 import com.example.groups.http.dto._
 import com.example.groups.http.dto.JsonSupport._
 import zio.internal.PlatformLive
@@ -12,13 +13,13 @@ import zio.{DefaultRuntime, IO, Runtime, ZIO}
 
 
 
-case class Router(service: GroupService,repos: ZIO[Any, Nothing, AppDatabase]) {
+case class Router(service: GroupService,repos: ZIO[Any, Nothing, Env]) {
 
   val runtime = Runtime(repos, PlatformLive.Default)
 
 
-  private def completeZio[A:ToResponseMarshaller ,B:ToResponseMarshaller](zio: => ZIO[AppDatabase,A, B]) = {
-    val res = zio.fold(complete(_),complete(_)).provideM(repos)
+  private def completeZio[A:ToResponseMarshaller ,B:ToResponseMarshaller](zio: => ZIO[Env,A, B]) = {
+    val res = zio.fold(complete(_) ,complete(_)).provideM(repos)
     runtime.unsafeRun(res)
   }
 
@@ -33,7 +34,7 @@ case class Router(service: GroupService,repos: ZIO[Any, Nothing, AppDatabase]) {
               }
             },
             path("group-feed") {
-              parameters("userId".as[UUID], "groupId".as[Int], "start-from-timestamp".as[Long].?,  "number-posts-to-load".as[Int].?) {
+              parameters("userId".as[UUID], "groupId".as[Int], "start-from-post".as[UUID].?,  "number-posts-to-load".as[Int].?) {
                (userId, groupId, startFromTimestamp, numberPosts) =>
                  completeZio(service.groupFeed(userId, groupId, startFromTimestamp, numberPosts))
               }

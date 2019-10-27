@@ -5,53 +5,54 @@ import com.example.groups.domain.Model._
 import java.util.UUID
 import java.util.UUID._
 
-import com.example.groups.Main.AppDatabase
-import zio.{IO, ZIO}
+import com.datastax.driver.core.utils.UUIDs
+import com.example.groups.Main.Env
+import zio.ZIO
 
 class GroupService (net: Network) {
 
   import net._
 
-  def registerUser(user: UserDto):ZIO[AppDatabase,ErrorDto,UserRegisteredDto] = wrapError {
+  def registerUser(user: UserDto):ZIO[Env,ErrorDto,UserRegisteredDto] = wrapError {
     for {
       registeredUser <- users.register(User(randomUUID, user.name))
     } yield UserRegisteredDto(registeredUser.id,s"User ${registeredUser.name} was registered")
   }
 
-  def postToGroup(user: PostRequestDto):IO[ErrorDto,SuccessDto]  = wrapError {
+  def postToGroup(postRequest: PostRequestDto):ZIO[Env,ErrorDto,SuccessDto]  = wrapError {
     for {
-      group <- groups.get(user.groupId)
-      post = Post(randomUUID, now, user.content)
-      _ <- group.post(post, user.userId, group.id)
+      group <- groups.get(postRequest.groupId, postRequest.userId)
+      post = Post(UUIDs.timeBased(), now, postRequest.content)
+      _ <- group.post(post, postRequest.userId, group.id)
     } yield SuccessDto(s"Message posted. ID: ${post.id}")
   }
 
-  def registerGroupMember(newMember: RegisterMemberDto):ZIO[AppDatabase,ErrorDto,SuccessDto] = wrapError {
+  def registerGroupMember(newMember: RegisterMemberDto):ZIO[Env,ErrorDto,SuccessDto] = wrapError {
     for {
       group <- groups.get(newMember.groupId)
       _ <- group.registerMember(newMember.userId)
     } yield SuccessDto("Member was registered")
   }
 
-  def listGroups(userId: UUID):ZIO[AppDatabase, ErrorDto,GroupsDto] = wrapError {
+  def listGroups(userId: UUID):ZIO[Env, ErrorDto,GroupsDto] = wrapError {
     for {
       groups <- groups.byUser(userId)
     } yield GroupsDto(groups.ids)
   }
 
   def groupFeed(userId: UUID, groupId: Int,
-                startFromTimestamp: Option[Long],
-                numberPostsToLoad: Option[Int]):IO[ErrorDto,FeedResponseDto] = wrapError {
+                startFromPostId: Option[UUID],
+                numberPostsToLoad: Option[Int]):ZIO[Env,ErrorDto,FeedResponseDto] = wrapError {
     for {
       group <- groups.get(groupId, userId)
-      feed <- group.feed(startFromTimestamp, numberPostsToLoad.getOrElse(POSTS_ON_PAGE))
+      feed <- group.feed(startFromPostId, numberPostsToLoad.getOrElse(POSTS_ON_PAGE))
       res = feed.map(p => PostResponseDto(p.post.id, p.post.creationTime, p.user.id, p.user.name, p.post.content))
     } yield FeedResponseDto(res)
   }
 
 
   def allGroupsFeed(userId: UUID, startFromTimestamp: Option[Long],
-                    numberPostsToLoad: Option[Int]):ZIO[AppDatabase, ErrorDto,AllFeedsResponseDto] = wrapError {
+                    numberPostsToLoad: Option[Int]):ZIO[Env, ErrorDto,AllFeedsResponseDto] = wrapError {
     for {
       groupSet <- groups.byUser(userId)
       feed <- groupSet.feed(startFromTimestamp, numberPostsToLoad.getOrElse(POSTS_ON_PAGE))

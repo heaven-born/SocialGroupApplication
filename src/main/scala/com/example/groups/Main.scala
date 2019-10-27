@@ -8,7 +8,7 @@ import akka.stream.Materializer
 import com.datastax.driver.core.SocketOptions
 import com.example.groups.domain.Model.Network
 import com.example.groups.http.{GroupService, Router}
-import com.example.groups.storage.{group_members, users}
+import com.example.groups.storage.{group_members, posts, users}
 import com.outworkers.phantom.connectors.{CassandraConnection, ContactPoint}
 import com.outworkers.phantom.database.Database
 import zio.{Ref, ZIO}
@@ -20,11 +20,13 @@ import scala.io.StdIn
 
 object Main {
 
-  abstract class AppDatabase(override val connector: CassandraConnection)
-      extends Database[AppDatabase](connector) with Console.Live with Clock.Live with Blocking.Live{
+  abstract class Env(override val connector: CassandraConnection)
+      extends Database[Env](connector) with Console.Live with Clock.Live with Blocking.Live {
     object users extends users with Connector
     object groups extends group_members with Connector
-    val shards:Ref[Map[UUID,Set[String]]]
+    object posts extends posts with Connector
+    val shards:Ref[Map[Int,Set[UUID]]]
+    val defaultShard = UUID.fromString("620d359c-ce4d-4d4a-8587-942c69dd57da")
   }
 
   val cassandraLogin = "cassandra"
@@ -56,9 +58,9 @@ object Main {
   def buildRoutes = {
 
 
-    val env: ZIO[Any, Nothing, AppDatabase] = for {
-      q <- Ref.make(Map[UUID,Set[String]]())
-    } yield new  AppDatabase(defaultConnection) with Console.Live with Clock.Live with Blocking.Live {
+    val env: ZIO[Any, Nothing, Env] = for {
+      q <- Ref.make(Map[Int,Set[UUID]]())
+    } yield new  Env(defaultConnection) with Console.Live with Clock.Live with Blocking.Live {
       override val shards = q
     }
 
