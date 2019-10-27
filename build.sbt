@@ -2,7 +2,7 @@ name := "SocialGroupApplication"
 
 version := "0.1"
 
-scalaVersion := "2.12.0"
+scalaVersion := "2.12.8"
 
 libraryDependencies += "com.github.nosan" % "embedded-cassandra" % "3.0.0"
 
@@ -31,17 +31,13 @@ libraryDependencies += "org.scalatest" %% "scalatest-matchers-core" % "3.2.0-M1"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.0-M1" % Test
 libraryDependencies += "org.scalatest" %% "scalatest-wordspec" % "3.2.0-M1" % Test
 
-
-
-
-
-
-
-
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.0-M8" % Test,
   "com.typesafe.akka" %% "akka-http-testkit" % "10.1.10" % Test
 )
+
+libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
+
 
 
 //libraryDependencies ++= Seq(
