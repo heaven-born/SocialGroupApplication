@@ -5,7 +5,8 @@ This application representing design solution for some aspects of abstract socia
 The application requires **Cassandra** database version >= 3.11 to be installed.
 Schemas and key sets will be created automatically. 
 
-Following key set names are used:
+Following key set names are used
+
 > social_network
 > social_network_test
 
