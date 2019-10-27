@@ -4,16 +4,16 @@ import java.util.UUID
 
 import com.example.groups.Env
 import com.example.groups.domain.Model._
-import zio.{RIO, Task, ZIO}
+import zio.{RIO, ZIO}
 
 trait GroupBehaviour {
   group : Group =>
 
-      def feed(startFromPostId: Option[UUID], numberPostsToLoad: Int):RIO[Env,Set[PostWithAuthor]] = {
+      def feed(startFromPostId: Option[UUID], numberPostsToLoad: Int):RIO[Env,Seq[PostWithAuthor]] = {
         for {
-          allShards <- ZIO.accessM[Env] { env => env.shards.get }
+          allShards <- ZIO.access[Env] { env => env.shardMapUnsafe }
           posts <- ZIO.accessM[Env] {  env =>
-            val groupShards = allShards.getOrElse(group.id,Set(env.defaultShard))
+            val groupShards = allShards.getOrElse(group.id,Seq(env.defaultShard))
             env.posts.findAllStartingFrom(startFromPostId,group.id,numberPostsToLoad,groupShards) }
         } yield posts
       }
@@ -30,9 +30,9 @@ trait GroupBehaviour {
       def post(post: Post, userId: UUID):RIO[Env,Post] =
         for {
           user <- ZIO.accessM[Env] { _.users.findById(userId) }
-          allShards <- ZIO.accessM[Env] { env => env.shards.get }
+          allShards <- ZIO.access[Env] { env => env.shardMapUnsafe }
           res <- ZIO.accessM[Env] { env =>
-            val shards = allShards.getOrElse(group.id,Set(env.defaultShard))
+            val shards = allShards.getOrElse(group.id,Seq(env.defaultShard))
             env.posts.store(post,group.id,userId,user.user_name,shards)
           }
         } yield res

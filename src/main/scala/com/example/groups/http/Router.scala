@@ -3,25 +3,16 @@ package com.example.groups.http
 import java.util.UUID
 
 import akka.http.scaladsl.marshalling.ToResponseMarshaller
-import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.StandardRoute
 import com.example.groups.Env
 import com.example.groups.http.dto._
 import com.example.groups.http.dto.JsonSupport._
-import zio.internal.PlatformLive
-import zio.{DefaultRuntime, IO, Runtime, ZIO}
+import zio.{DefaultRuntime, ZIO}
 
 
 
-case class Router(service: GroupService,repos: ZIO[Any, Nothing, Env]) {
-
-  val runtime = Runtime(repos, PlatformLive.Default)
-
-
-  private def completeZio[A:ToResponseMarshaller ,B:ToResponseMarshaller](zio: => ZIO[Env,A, B]) = {
-    val res = zio.fold(complete(_) ,complete(_)).provideM(repos)
-    runtime.unsafeRun(res)
-  }
+case class Router(service: GroupService,repos: Env, runtime: DefaultRuntime) {
 
 
   def routes() = {
@@ -68,4 +59,11 @@ case class Router(service: GroupService,repos: ZIO[Any, Nothing, Env]) {
         }
       )
   }
+
+
+  private def completeZio[A:ToResponseMarshaller ,B:ToResponseMarshaller](zio: => ZIO[Env,A, B]) = {
+    val res: ZIO[Any, Nothing, StandardRoute] = zio.fold(complete(_) ,complete(_)).provide(repos)
+    runtime.unsafeRun(res)
+  }
+
 }

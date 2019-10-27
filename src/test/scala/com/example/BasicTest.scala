@@ -1,18 +1,16 @@
 package com.example
 
-import java.util.UUID
 
-import com.example.groups.{Env, Main}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import com.datastax.driver.core.SocketOptions
 import com.example.groups.domain.Model.Network
 import com.example.groups.http.{GroupService, Router}
 import com.example.groups.http.dto._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import com.example.groups.http.dto.JsonSupport._
-import com.outworkers.phantom.connectors.{CassandraConnection, ContactPoint}
-import zio.{Ref, ZIO}
+import zio.DefaultRuntime
+
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 
 
 class BasicTest extends AnyWordSpec with ScalatestRouteTest {
@@ -20,7 +18,16 @@ class BasicTest extends AnyWordSpec with ScalatestRouteTest {
 
     import DefaultTestEvn._
 
-    val smallRoute = Router(new GroupService(Network()),env).routes()
+    val runtime = new DefaultRuntime{}
+
+    val smallRoute = Router(new GroupService(Network()),env,runtime).routes()
+
+    {  // create db is doesn't exist yet
+        import com.outworkers.phantom.dsl._
+        val ec: ExecutionContextExecutor = ExecutionContext.global
+        env.drop(env.defaultTimeout)(ec)
+        env.create(env.defaultTimeout)(ec)
+    }
 
     "Application" should {
 
@@ -57,7 +64,26 @@ class BasicTest extends AnyWordSpec with ScalatestRouteTest {
 
             val post = PostRequestDto(userId, 2, "some content")
             Post("/post-to-group", post) ~> smallRoute ~> check {
-                responseAs[SuccessDto]
+                responseAs[SuccessDto].message should startWith ("Message posted. ID:")
+            }
+
+            val post2 = PostRequestDto(userId, 1, "some content")
+            Post("/post-to-group", post2) ~> smallRoute ~> check {
+                responseAs[ErrorDto].error should not be empty
+            }
+
+            Get(s"/group-feed?userId=$userId&groupId=2") ~> smallRoute ~> check {
+                val feed = responseAs[FeedResponseDto]
+                feed.posts.size shouldBe 1
+            }
+
+            Get(s"/group-feed?userId=$userId&groupId=1") ~> smallRoute ~> check {
+                responseAs[ErrorDto].error should include ("is not a member of group")
+            }
+
+            Get(s"/all-user-groups-feed?userId=$userId") ~> smallRoute ~> check {
+                val feed = responseAs[FeedResponseDto]
+                feed.posts.size shouldBe 1
             }
 
 

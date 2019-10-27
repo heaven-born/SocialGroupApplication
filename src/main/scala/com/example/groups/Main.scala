@@ -1,46 +1,39 @@
 package com.example.groups
 
-import java.util.UUID
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import com.datastax.driver.core.SocketOptions
 import com.example.groups.domain.Model.Network
 import com.example.groups.http.{GroupService, Router}
-import com.outworkers.phantom.connectors.{CassandraConnection, ContactPoint}
+import com.outworkers.phantom.connectors.{CassandraConnection, ContactPoint, KeySpace}
 import zio._
 import zio.blocking.Blocking
 import zio.clock.Clock
 import zio.console.Console
 import zio.duration._
 
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 import scala.io.StdIn
 
 object Main {
 
-  val cassandraLogin = "cassandra"
-  val cassandraPassword = "cassandra"
-  val httpServerHost = "localhost"
-  val httpServerPort = 8080
-
-  val defaultConnection: CassandraConnection = ContactPoint.local
-    .withClusterBuilder(
-      _.withSocketOptions(new SocketOptions())
-       .withCredentials(cassandraLogin, cassandraPassword)
-    ).keySpace("social_network")
-
-  val env: ZIO[Any, Nothing, Env] = for {
-    q <- Ref.make(Map[Int,Set[UUID]]())
-  } yield new Env(defaultConnection) with Console.Live with Clock.Live with Blocking.Live {
-    override val shards = q
-  }
 
   def main(args: Array[String]): Unit = {
 
     implicit val system: ActorSystem = ActorSystem("groupsActorSystem")
     implicit val executionContext = system.dispatcher
 
-    val routes = Router(new GroupService(Network()),env).routes()
+    val runtime = new DefaultRuntime{}
+
+    {
+      import com.outworkers.phantom.dsl._
+      val ec: ExecutionContextExecutor = ExecutionContext.global
+      env.create(env.defaultTimeout)(ec)
+    }
+
+    runtime.unsafeRunToFuture(shardScheduler.provide(env))
+
+    val routes = Router(new GroupService(Network()),env,runtime).routes()
 
     val bindingFuture = Http().bindAndHandle(routes, httpServerHost, httpServerPort)
 
@@ -52,12 +45,34 @@ object Main {
 
   }
 
-  def buildRoutes = {
+  val shardUpdatePeriod = 1.minute
+  val cassandraLogin = "cassandra"
+  val cassandraPassword = "cassandra"
+  val httpServerHost = "localhost"
+  val httpServerPort = 8080
 
-    val spaced = Schedule.spaced(1.seconds)
-    val res = ZIO.effect(println("bla")).repeat(spaced).forever
-    val runtime = new DefaultRuntime{}
-    runtime.unsafeRunToFuture(res)
+  val defaultConnection: CassandraConnection = ContactPoint.local
+    .withClusterBuilder(
+      _.withSocketOptions(new SocketOptions())
+        .withCredentials(cassandraLogin, cassandraPassword)
+    ).keySpace("social_network")
+
+  val env = new Env(defaultConnection) with Console.Live with Clock.Live with Blocking.Live
+
+
+
+  //this scheduler updates local cache of shards from time to time.
+  def shardScheduler = {
+
+    val updater = ZIO.accessM[Env] {env =>
+      env.shards.findAll().map{s =>
+        env.shardMapUnsafe = s
+        println("Shards updated. New values: "+s.map(k=>("Group: "+k._1)->("Count: "+k._2.size)))
+      }
+    }
+
+    val spaced = Schedule.spaced(shardUpdatePeriod)
+    updater.repeat(spaced).forever
 
   }
 

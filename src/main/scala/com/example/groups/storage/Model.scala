@@ -1,11 +1,10 @@
 package com.example.groups.storage
 
-import java.time.Instant
 import java.util.UUID
-import com.datastax.driver.core.utils.UUIDs
 
+import com.datastax.driver.core.utils.UUIDs
 import com.example.groups.domain.Model.{Group, Post, PostWithAuthor, User}
-import com.example.groups.storage.Model.{group_member, post, user}
+import com.example.groups.storage.Model.{group_member, post, shard, user}
 import com.outworkers.phantom.dsl._
 import zio.{Task, ZIO}
 
@@ -15,12 +14,27 @@ import scala.util.Random
 private [storage] object Model {
   case class group_member(user_id:UUID,group_id: Int)
   case class user(user_id: UUID, user_name: String)
+  case class shard(group_id: Int, shard_id: UUID)
   case class post( post_id: UUID,
                    group_id: Int,
                    shard_id: UUID,
                    user_id: UUID,
                    user_name :String,
                    content: String)
+}
+
+abstract class shards extends Table[shards,shard] {
+  object group_id extends IntColumn with PartitionKey
+  object shard_id extends UUIDColumn with PrimaryKey
+
+  def findAll() = ZIO.fromFuture { _ =>
+    select.all().fetch().map{shadList =>
+      shadList
+        .groupBy(_.group_id)
+        .map(v=>v._1 -> v._2.map(_.shard_id))
+    }
+  }
+
 }
 
 abstract class posts extends Table[posts,post] {
@@ -31,11 +45,9 @@ abstract class posts extends Table[posts,post] {
   object user_name extends StringColumn
   object content extends StringColumn
 
-  //object posted_time extends Time with PrimaryKey
-  //posted_time timestamp,
   val rnd = new Random()
 
-  def store(post: Post, groupId: Int, userId: UUID, userName: String, shards: Set[UUID]): Task[Post] = ZIO.fromFuture { _ =>
+  def store(post: Post, groupId: Int, userId: UUID, userName: String, shards: Seq[UUID]): Task[Post] = ZIO.fromFuture { _ =>
 
     val n = util.Random.nextInt(shards.size)
     val randomShard = shards.iterator.drop(n).next
@@ -50,7 +62,7 @@ abstract class posts extends Table[posts,post] {
       .future().map(_=>post)
   }
 
-  def findAllStartingFrom(timeUid: Option[UUID], groupId: Int, postLimit: Int, shards: Set[UUID]) = ZIO.fromFuture{ _ =>
+  def findAllStartingFrom(timeUid: Option[UUID], groupId: Int, postLimit: Int, shards: Seq[UUID]) = ZIO.fromFuture{ _ =>
     def fromShard(shardId: UUID) = {
       val common = select.where(_.group_id eqs groupId)
                          .and(_.shard_id eqs shardId)

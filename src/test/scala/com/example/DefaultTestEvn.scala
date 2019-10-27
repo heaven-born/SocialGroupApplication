@@ -12,19 +12,18 @@ import zio.blocking.Blocking
 import zio.clock.Clock
 import zio.console.Console
 
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
+
 object DefaultTestEvn {
 
   val defaultConnection: CassandraConnection = ContactPoint.local
     .withClusterBuilder(
       _.withSocketOptions(new SocketOptions())
         .withCredentials("cassandra", "cassandra")
-    ).keySpace("social_network")
+    ).keySpace("social_network_test")
 
 
-  val env: ZIO[Any, Nothing, Env] = for {
-    q <- Ref.make(Map[Int,Set[UUID]]())
-  } yield new  Env(defaultConnection) with Blocking.Live {
-    override val shards = q
-  }
+  val env = new  Env(defaultConnection) with Blocking.Live
+
 
 }
