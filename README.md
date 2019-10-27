@@ -3,7 +3,7 @@
 This application representing design solution for some aspects of abstract social network.
 
 The application requires **Cassandra** database version >= 3.11 to be installed.
-Schemas and key sets will be created automatically. 
+Schemas and keyspaces will be created automatically. 
 
 Following key set names are used
 
