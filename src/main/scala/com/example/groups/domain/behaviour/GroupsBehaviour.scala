@@ -2,7 +2,7 @@ package com.example.groups.domain.behaviour
 
 import java.util.UUID
 
-import com.example.groups.Main.Env
+import com.example.groups.Env
 import com.example.groups.domain.Model._
 import zio.{RIO, Task, ZIO}
 

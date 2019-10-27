@@ -6,7 +6,7 @@ import java.util.UUID
 import java.util.UUID._
 
 import com.datastax.driver.core.utils.UUIDs
-import com.example.groups.Main.Env
+import com.example.groups.Env
 import zio.ZIO
 
 class GroupService (net: Network) {

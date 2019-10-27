@@ -1,6 +1,6 @@
 package com.example.groups.domain.behaviour
 
-import com.example.groups.Main.Env
+import com.example.groups.Env
 import com.example.groups.domain.Model._
 import zio.{RIO, ZIO}
 

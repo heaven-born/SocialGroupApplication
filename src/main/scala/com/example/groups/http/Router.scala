@@ -5,7 +5,7 @@ import java.util.UUID
 import akka.http.scaladsl.marshalling.ToResponseMarshaller
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import com.example.groups.Main.Env
+import com.example.groups.Env
 import com.example.groups.http.dto._
 import com.example.groups.http.dto.JsonSupport._
 import zio.internal.PlatformLive

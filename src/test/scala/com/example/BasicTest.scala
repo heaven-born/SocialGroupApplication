@@ -1,17 +1,26 @@
 package com.example
 
-import com.example.groups.Main
+import java.util.UUID
 
+import com.example.groups.{Env, Main}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import com.datastax.driver.core.SocketOptions
+import com.example.groups.domain.Model.Network
+import com.example.groups.http.{GroupService, Router}
 import com.example.groups.http.dto._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers._
 import com.example.groups.http.dto.JsonSupport._
+import com.outworkers.phantom.connectors.{CassandraConnection, ContactPoint}
+import zio.{Ref, ZIO}
 
 
 class BasicTest extends AnyWordSpec with ScalatestRouteTest {
 
-    val smallRoute = Main.buildRoutes
+
+    import DefaultTestEvn._
+
+    val smallRoute = Router(new GroupService(Network()),env).routes()
 
     "Application" should {
 
