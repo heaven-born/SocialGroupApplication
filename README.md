@@ -45,7 +45,9 @@ Scalability on group up to 1M members and 100M total posts is acheavable in auto
 
 Requires some work on configuring blocking non-blocing thread pools. Now all request to cassandra are considered as non-blocking. 
 
-Shards information sharing and shceduling updates looks not very good now. 
+Shards information sharing and shceduling updates looks not very good now.
+
+HTTP statuses not used. All responces including errors returns 200 status.
 
 # APIs
 
