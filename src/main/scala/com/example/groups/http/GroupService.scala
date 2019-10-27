@@ -22,8 +22,8 @@ class GroupService (net: Network) {
   def postToGroup(postRequest: PostRequestDto):ZIO[Env,ErrorDto,SuccessDto]  = wrapError {
     for {
       group <- groups.get(postRequest.groupId, postRequest.userId)
-      post = Post(UUIDs.timeBased(), now, postRequest.content)
-      _ <- group.post(post, postRequest.userId, group.id)
+      post = Post(UUIDs.timeBased(),group.id, now, postRequest.content)
+      _ <- group.post(post, postRequest.userId)
     } yield SuccessDto(s"Message posted. ID: ${post.id}")
   }
 
@@ -47,16 +47,16 @@ class GroupService (net: Network) {
       group <- groups.get(groupId, userId)
       feed <- group.feed(startFromPostId, numberPostsToLoad.getOrElse(POSTS_ON_PAGE))
       res = feed.map(p => PostResponseDto(p.post.id, p.post.creationTime, p.user.id, p.user.name, p.post.content))
-    } yield FeedResponseDto(res)
+    } yield FeedResponseDto(res.toList)
   }
 
 
-  def allGroupsFeed(userId: UUID, startFromTimestamp: Option[Long],
+  def allGroupsFeed(userId: UUID, startFromTimestamp: Option[UUID],
                     numberPostsToLoad: Option[Int]):ZIO[Env, ErrorDto,AllFeedsResponseDto] = wrapError {
     for {
       groupSet <- groups.byUser(userId)
       feed <- groupSet.feed(startFromTimestamp, numberPostsToLoad.getOrElse(POSTS_ON_PAGE))
-      res = feed.map(p => PostAllFeedsResponseDto(p.post.id, p.post.creationTime, p.user.id, p.user.name.toString, p.post.content))
+      res = feed.map(p => PostAllFeedsResponseDto(p.post.id, p.post.creationTime, p.user.id, p.user.name.toString, p.post.content,p.post.groupId))
     } yield AllFeedsResponseDto(res)
   }
 

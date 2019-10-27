@@ -2,8 +2,9 @@ package com.example.groups.storage
 
 import java.time.Instant
 import java.util.UUID
+import com.datastax.driver.core.utils.UUIDs
 
-import com.example.groups.domain.Model.{Group, Post, User}
+import com.example.groups.domain.Model.{Group, Post, PostWithAuthor, User}
 import com.example.groups.storage.Model.{group_member, post, user}
 import com.outworkers.phantom.dsl._
 import zio.{Task, ZIO}
@@ -49,12 +50,28 @@ abstract class posts extends Table[posts,post] {
       .future().map(_=>post)
   }
 
-  def findAllStartingFrom(groupId: Int, timeUid: UUID, shards: Set[UUID]) = ZIO.fromFuture{ _ =>
-    def fromShard(id: UUID) =
-      select.where(_.group_id eqs groupId)
-            .and(_.post_id >= timeUid).fetch()
+  def findAllStartingFrom(timeUid: Option[UUID], groupId: Int, postLimit: Int, shards: Set[UUID]) = ZIO.fromFuture{ _ =>
+    def fromShard(shardId: UUID) = {
+      val common = select.where(_.group_id eqs groupId)
+                         .and(_.shard_id eqs shardId)
+                         .limit(postLimit)
+      timeUid match {
+        case None =>  common.fetch()
+        case Some(uid) =>  common.and(_.post_id >= uid).fetch()
+      }
+    }
 
-    Future.sequence(shards.map(fromShard)).map(_.flatten)
+
+    for {
+      posts <- Future.sequence(shards.map(fromShard)).map(_.flatten)
+      res  = posts.map{p =>
+          val createDateTimestamp = UUIDs.unixTimestamp(p.post_id) *1000L
+          val ps = Post(p.post_id,p.group_id,createDateTimestamp,p.content)
+          val user = User(p.user_id,p.user_name)
+          PostWithAuthor(ps,user)
+      }
+    }  yield res
+
   }
 
 }

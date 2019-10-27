@@ -9,12 +9,14 @@ import zio.{RIO, Task, ZIO}
 trait GroupBehaviour {
   group : Group =>
 
-      def feed(startFromPostId: Option[UUID], numberPostsToLoad: Int):Task[List[PostWithAuthor]] =
-        ZIO.effectTotal(
-          List(
-            PostWithAuthor(
-              Post(UUID.randomUUID(),System.currentTimeMillis(),"content stub"),
-              User(UUID.randomUUID(),"userName"))))
+      def feed(startFromPostId: Option[UUID], numberPostsToLoad: Int):RIO[Env,Set[PostWithAuthor]] = {
+        for {
+          allShards <- ZIO.accessM[Env] { env => env.shards.get }
+          posts <- ZIO.accessM[Env] {  env =>
+            val groupShards = allShards.getOrElse(group.id,Set(env.defaultShard))
+            env.posts.findAllStartingFrom(startFromPostId,group.id,numberPostsToLoad,groupShards) }
+        } yield posts
+      }
 
       def registerMember(userId: UUID):RIO[Env,Group] =
         for {
@@ -25,13 +27,13 @@ trait GroupBehaviour {
                    ZIO.accessM[Env] { _.groups.store(group.id,userId) }
         } yield res
 
-      def post(post: Post, userId: UUID, groupId: Int):RIO[Env,Post] =
+      def post(post: Post, userId: UUID):RIO[Env,Post] =
         for {
           user <- ZIO.accessM[Env] { _.users.findById(userId) }
           allShards <- ZIO.accessM[Env] { env => env.shards.get }
           res <- ZIO.accessM[Env] { env =>
-            val shards = allShards.getOrElse(groupId,Set(env.defaultShard))
-            env.posts.store(post,groupId,userId,user.user_name,shards)
+            val shards = allShards.getOrElse(group.id,Set(env.defaultShard))
+            env.posts.store(post,group.id,userId,user.user_name,shards)
           }
         } yield res
 

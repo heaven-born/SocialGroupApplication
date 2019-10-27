@@ -2,17 +2,9 @@ package com.example
 
 import com.example.groups.Main
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
-import akka.http.scaladsl.server._
-import Directives._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.http.scaladsl.server._
-import Directives._
 import com.example.groups.http.dto._
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest._
 import org.scalatest.matchers.should.Matchers._
 import com.example.groups.http.dto.JsonSupport._
 

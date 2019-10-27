@@ -15,7 +15,7 @@ object Model {
   case class Users() extends UsersBehaviour
   case class User(id: UUID, name: String)
 
-  case class Post(id: UUID, creationTime: Long, content: String)
+  case class Post(id: UUID,  groupId: Int, creationTime: Long, content: String)
 
 
   // ------- wrappers -----------/

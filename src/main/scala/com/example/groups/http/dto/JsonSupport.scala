@@ -16,7 +16,7 @@ object JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit lazy val postRespFormat = jsonFormat5(PostResponseDto)
   implicit lazy val orderFormat = jsonFormat1(FeedResponseDto)
 
-  implicit lazy val postRespAllFormat = jsonFormat5(PostAllFeedsResponseDto)
+  implicit lazy val postRespAllFormat = jsonFormat6(PostAllFeedsResponseDto)
   implicit lazy val postAllRespFormat = jsonFormat1(AllFeedsResponseDto)
 
 }
