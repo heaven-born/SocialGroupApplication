@@ -12,6 +12,8 @@ social_network
 social_network_test
 ```
 
+Database struture is also available in socail_network.cql file.
+
 
 For simplicity configuration properties are hardcode in **com.example.groups.Main** class
 
