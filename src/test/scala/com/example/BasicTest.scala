@@ -81,7 +81,7 @@ class BasicTest extends AnyWordSpec with ScalatestRouteTest {
                 responseAs[ErrorDto].error should include ("is not a member of group")
             }
 
-            Get(s"/all-user-groups-feed?userId=$userId") ~> smallRoute ~> check {
+            Get(s"/all-groups-feed?userId=$userId") ~> smallRoute ~> check {
                 val feed = responseAs[FeedResponseDto]
                 feed.posts.size shouldBe 1
             }

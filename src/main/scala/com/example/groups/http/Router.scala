@@ -30,7 +30,7 @@ case class Router(service: GroupService,repos: Env, runtime: DefaultRuntime) {
                  completeZio(service.groupFeed(userId, groupId, startFromTimestamp, numberPosts))
               }
             },
-            path("all-user-groups-feed") {
+            path("all-groups-feed") {
               parameters("userId".as[UUID],"start-from-post".as[UUID].?,  "number-posts-to-load".as[Int].?) {
                 (userId, startFromTimestamp, numberPosts) =>
                   completeZio(service.allGroupsFeed(userId, startFromTimestamp, numberPosts))
