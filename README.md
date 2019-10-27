@@ -41,6 +41,8 @@ Scalability up to 10M users is achievable by adding multiple HTTP server nodes b
 
 Scalability on group up to 1M members and 100M total posts is acheavable in automated, semiautomated or manual mode. In order to preved overloading one node containging all records from a singlre group, I added "shard_id" filed into partition key on "post" table. Once some group beomces too big, it's possible to add new shard to table "shard". This new shard will be propogated to application automatically. The only restriction in current version is that default shard id for each group is not published in shard table  automatically, so it has to be added there manually ones group requires more that one shard. If default shard id will not be added with new shard, all data from default shard will become invisible for the application.
 
+It may also worth to add some probability value to shards, so that new shards could be chosed for inserting data more often that old shards.  
+
 # Known issues
 
 Requires some work on configuring blocking non-blocing thread pools. Now all request to cassandra are considered as non-blocking. 
