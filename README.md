@@ -2,7 +2,7 @@
 
 This application representing design solution for some aspects of abstract social network.
 
-The application requires **Cassandra** database version >= 3.11 to be installed.
+The application requires **Cassandra** database version >= 3.11 to be installed or in can be started with embedded version (see Running section).
 Schemas and keyspaces will be created automatically. 
 
 Following key set names are used
@@ -31,7 +31,7 @@ http://localhost:8080/
 
 # Running
 
-*sbt run*  - starts http server on local host listening 8080 port
+*sbt [-Drun_cassandra=true] run*  - starts http server on local host listening 8080 port and cassandra (optional)
 
 *sbt [-Drun_cassandra=true] test* - executes some basic integration test.
 

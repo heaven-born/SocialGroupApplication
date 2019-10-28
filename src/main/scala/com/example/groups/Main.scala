@@ -5,6 +5,8 @@ import akka.http.scaladsl.Http
 import com.datastax.driver.core.SocketOptions
 import com.example.groups.domain.Model.Network
 import com.example.groups.http.{GroupService, Router}
+import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory
+import com.github.nosan.embedded.cassandra.api.Cassandra
 import com.outworkers.phantom.connectors.{CassandraConnection, ContactPoint, KeySpace}
 import zio._
 import zio.blocking.Blocking
@@ -24,6 +26,12 @@ object Main {
     implicit val executionContext = system.dispatcher
 
     val runtime = new DefaultRuntime{}
+    val cassandraFactory: EmbeddedCassandraFactory = new EmbeddedCassandraFactory
+    val cassandra: Cassandra = cassandraFactory.create
+
+    if (sys.props.getOrElse("run_cassandra", "true").toBoolean){
+      cassandra.start()
+    }
 
     {
       import com.outworkers.phantom.dsl._
