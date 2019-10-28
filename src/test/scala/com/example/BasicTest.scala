@@ -19,15 +19,28 @@ class BasicTest extends AnyWordSpec with ScalatestRouteTest {
 
     import DefaultTestEvn._
 
-    val runtime = new DefaultRuntime{}
+    val runtime = new DefaultRuntime {}
 
-    val smallRoute = Router(new GroupService(Network()),env,runtime).routes()
+    val smallRoute = Router(new GroupService(Network()), env, runtime).routes()
+
+    import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory
+    import com.github.nosan.embedded.cassandra.api.Cassandra
+    val cassandraFactory: EmbeddedCassandraFactory = new EmbeddedCassandraFactory
+    val cassandra: Cassandra = cassandraFactory.create
+
+    if (sys.props.getOrElse("run_cassandra", "true").toBoolean){
+       cassandra.start()
+    }
 
     {  // create db is doesn't exist yet
         import com.outworkers.phantom.dsl._
         val ec: ExecutionContextExecutor = ExecutionContext.global
         Try{env.drop(env.defaultTimeout)(ec)}
         env.create(env.defaultTimeout)(ec)
+    }
+
+    override def afterAll(): Unit = {
+        try{cassandra.stop()}
     }
 
     "Application" should {
