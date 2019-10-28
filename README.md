@@ -51,6 +51,8 @@ Shards information sharing and shceduling updates looks not very good now.
 
 HTTP statuses not used. All responces including errors returns 200 status.
 
+Would be nice to have a swagger file.
+
 # APIs
 
 POST http://localhost:8080/register-user 
