@@ -31,9 +31,9 @@ http://localhost:8080/
 
 # Running
 
-*sbt [-Drun_cassandra=true] run*  - starts http server on local host listening 8080 port and cassandra (optional)
+```sbt [-Drun_cassandra=true] run```  - starts http server on local host listening 8080 port and cassandra (optional)
 
-*sbt [-Drun_cassandra=true] test* - executes some basic integration test.
+```sbt [-Drun_cassandra=true] test``` - executes some basic integration test.
 
 # Scalability
 
