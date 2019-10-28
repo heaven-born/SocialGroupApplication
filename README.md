@@ -2,7 +2,7 @@
 
 This application representing design solution for some aspects of abstract social network.
 
-The application requires **Cassandra** database version >= 3.11 to be installed or in can be started with embedded version (see Running section).
+The application requires **Cassandra** database version >= 3.11 to be installed or it can be started with embedded version of Cassandra (see Running section).
 Schemas and keyspaces will be created automatically. 
 
 Following key set names are used
