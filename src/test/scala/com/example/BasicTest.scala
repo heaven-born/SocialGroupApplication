@@ -11,6 +11,7 @@ import com.example.groups.http.dto.JsonSupport._
 import zio.DefaultRuntime
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
+import scala.util.Try
 
 
 class BasicTest extends AnyWordSpec with ScalatestRouteTest {
@@ -25,7 +26,7 @@ class BasicTest extends AnyWordSpec with ScalatestRouteTest {
     {  // create db is doesn't exist yet
         import com.outworkers.phantom.dsl._
         val ec: ExecutionContextExecutor = ExecutionContext.global
-        env.drop(env.defaultTimeout)(ec)
+        Try{env.drop(env.defaultTimeout)(ec)}
         env.create(env.defaultTimeout)(ec)
     }
 

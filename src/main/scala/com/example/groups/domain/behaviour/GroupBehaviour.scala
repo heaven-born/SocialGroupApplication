@@ -11,9 +11,8 @@ trait GroupBehaviour {
 
       def feed(startFromPostId: Option[UUID], numberPostsToLoad: Int):RIO[Env,Seq[PostWithAuthor]] = {
         for {
-          allShards <- ZIO.access[Env] { env => env.shardMapUnsafe }
           posts <- ZIO.accessM[Env] {  env =>
-            val groupShards = allShards.getOrElse(group.id,Seq(env.defaultShard))
+            val groupShards = env.shardMapUnsafe.getOrElse(group.id,Seq(env.defaultShard))
             env.posts.findAllStartingFrom(startFromPostId,group.id,numberPostsToLoad,groupShards) }
         } yield posts
       }
@@ -30,9 +29,8 @@ trait GroupBehaviour {
       def post(post: Post, userId: UUID):RIO[Env,Post] =
         for {
           user <- ZIO.accessM[Env] { _.users.findById(userId) }
-          allShards <- ZIO.access[Env] { env => env.shardMapUnsafe }
           res <- ZIO.accessM[Env] { env =>
-            val shards = allShards.getOrElse(group.id,Seq(env.defaultShard))
+            val shards = env.shardMapUnsafe.getOrElse(group.id,Seq(env.defaultShard))
             env.posts.store(post,group.id,userId,user.user_name,shards)
           }
         } yield res
