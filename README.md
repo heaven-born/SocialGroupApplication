@@ -1,9 +1,11 @@
 # SocialGroupApplication
 
-This application representing design solution for some aspects of abstract social network.
+This application represents a design solution for a few aspects of abstract social network.
 
-The application requires **Cassandra** database version >= 3.11 to be installed or it can be started with embedded version of Cassandra (see Running section).
-Schemas and keyspaces will be created automatically. 
+Tech stack: Akka HTTP, cassandra, Phantom (orm), ZIO
+
+The application requires **Cassandra** database version >= 3.11 which is embedded using sbt plugin (see Running section).
+Both schemas and keyspaces will be created automatically on start. 
 
 Following key set names are used
 
@@ -12,7 +14,7 @@ social_network
 social_network_test
 ```
 
-Database struture is also available in socail_network.cql file.
+Copy of the database struture is also available in socail_network.cql file.
 
 
 For simplicity configuration properties are hardcode in **com.example.groups.Main** class
@@ -33,25 +35,25 @@ http://localhost:8080/
 
 ```sbt [-Drun_cassandra=true] run```  - starts http server on local host listening 8080 port and cassandra (optional)
 
-```sbt [-Drun_cassandra=true] test``` - executes some basic integration test.
+```sbt [-Drun_cassandra=true] test``` - executes basic integration test.
 
 # Scalability
 
-Scalability up to 10M users is achievable by adding multiple HTTP server nodes behind load balancer.
+Scalability up to 10M users is achievable by running multiple version of this application behind load balancer.
 
-Scalability on group up to 1M members and 100M total posts is acheavable in automated, semiautomated or manual mode. In order to prevent overloading one node containging all records from a singlre group, I added "shard_id" filed into partition key on "post" table. Once some group beomces too big, it's possible to add new shard to table "shard". This new shard will be propogated to application automatically. The only restriction in current version is that default shard id for each group is not published in shard table  automatically, so it has to be added there manually ones group requires more that one shard. If default shard id will not be added with new shard, all data from default shard will become invisible for the application.
+Scalability on group up to 1M members and 100M total posts is acheavable in automated, semiautomated or manual mode. In order to prevent overloading of one node containging all records from a singlre group, there is a "shard_id" filed added on a partition key of "post" table. Once some group beomces too big, there is a possibility to insert new shard to table "shard". This new shard will be propogated to application automatically and allow record for a single group to be distrebuted across more than one partition key. 
 
-It may also worth to add some probability value to shards, so that new shards could be chosed for inserting data more often that old shards.  
+The restriction in current version is that default shard id for each group is not published in shard table automatically, so it has to be added there manually ones group requires more that one shard. If default shard id will not be added with new shard, all data from default shard will become invisible for the application.
+
+It may also worth to add some probability value to shards, so that new shards could be chosed for inserting data more often that for old shards.  
 
 # Known issues
 
-Requires some work on configuring blocking non-blocing thread pools. Now all request to cassandra are considered as non-blocking. 
+Requires some work on configuring blocking/non-blocing thread pools. Now all request to cassandra are considered as non-blocking. 
 
 Shards information sharing and shceduling updates looks not very good now.
 
 HTTP statuses not used. All responces including errors returns 200 status.
-
-Would be nice to have a swagger file.
 
 # APIs
 
