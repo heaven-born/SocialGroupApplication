@@ -41,7 +41,7 @@ http://localhost:8080/
 
 Scalability up to 10M users is achievable by running multiple version of this application behind load balancer.
 
-Scalability on group up to 1M members and 100M total posts is acheavable in automated, semiautomated or manual mode. In order to prevent overloading of one node containging all records from a singlre group, there is a "shard_id" filed added on a partition key of "post" table. Once some group beomces too big, there is a possibility to insert new shard to table "shard". This new shard will be propogated to application automatically and allow record for a single group to be distrebuted across more than one partition key. 
+Scalability on group up to 1M members and 100M total posts is acheavable in automated, semiautomated or manual mode. In order to prevent overloading of one node containging all records from a singlre group, there is a "shard_id" field added on a partition key of "post" table. Once some group beomces too big, there is a possibility to insert new shard to table "shard". This new shard will be propogated to application automatically and allow record for a single group to be distrebuted across more than one partition key. 
 
 The restriction in current version is that default shard id for each group is not published in shard table automatically, so it has to be added there manually ones group requires more that one shard. If default shard id will not be added with new shard, all data from default shard will become invisible for the application.
 
