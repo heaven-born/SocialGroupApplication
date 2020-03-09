@@ -53,7 +53,7 @@ Requires some work on configuring blocking/non-blocing thread pools. Now all req
 
 Shards information sharing and shceduling updates looks not very good now.
 
-HTTP statuses not used. All responces including errors returns 200 status.
+HTTP statuses are not used. All responces including errors return 200 status.
 
 # APIs
 
