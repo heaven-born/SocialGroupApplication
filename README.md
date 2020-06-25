@@ -1,6 +1,6 @@
 # SocialGroupApplication
 
-This application represent a design solution for a few aspects of abstract social network.
+This application represents a design solution for a few aspects of abstract social network.
 
 Tech stack: Akka HTTP, cassandra, Phantom (orm), ZIO
 
